@@ -1,0 +1,13 @@
+AddBoxIntent add a new box {BoxName}
+AddBoxIntent add a new box named {BoxName}
+
+RemoveBoxIntent remove box {BoxName}
+RemoveBoxIntent remove box named {BoxName}
+
+AddItemIntent add a {Item} to {BoxName}
+AddItemIntent add a {Item} to box {BoxName}
+
+RemoveitemIntent remove a {Item} from {BoxName}
+RemoveitemIntent remove a {Item} from box {BoxName}
+RemoveitemIntent remove {Item} from {BoxName}
+RemoveitemIntent remove {Item} from box {BoxName}

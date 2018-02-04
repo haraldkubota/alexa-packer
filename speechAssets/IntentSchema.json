@@ -1,0 +1,59 @@
+{
+  "intents": [
+    {
+      "intent": "AddBoxIntent",
+      "slots": [
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    },
+    {
+      "intent": "RemoveBoxIntent",
+      "slots": [
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    },
+
+/*
+   {
+      "intent": "AddItemIntent",
+      "slots": [
+        {
+          "name": "ItemName",
+          "type": "AMAZON.LITERAL"
+        }
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    },
+   {
+      "intent": "RemoveItemIntent",
+      "slots": [
+        {
+          "name": "ItemName",
+          "type": "AMAZON.LITERAL"
+        }
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    }, */
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}

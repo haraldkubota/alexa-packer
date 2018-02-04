@@ -1,0 +1,30 @@
+{
+  "name": "alexa-packer",
+  "version": "1.0.0",
+  "description": "Packing stuff into boxes or containers with Alexa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haraldkubota/alexa-packer.git"
+  },
+  "keywords": [
+    "alexa"
+  ],
+  "author": "Harald Kubota",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/haraldkubota/alexa-packer/issues"
+  },
+  "homepage": "https://github.com/haraldkubota/alexa-packer#readme",
+  "devDependencies": {
+    "eslint": "^4.1.1",
+    "eslint-config-google": "^0.9.1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.188.0"
+  }
+}
