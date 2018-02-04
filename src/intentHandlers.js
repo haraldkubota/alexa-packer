@@ -12,211 +12,144 @@
 var textHelper = require('./textHelper'),
   storage = require('./storage')
 
-var registerIntentHandlers = function (intentHandlers, skillContext) {
+var registerIntentHandlers = function(intentHandlers, skillContext) {
 
-  intentHandlers.AddBoxIntent = function (intent, session, response) {
+  intentHandlers.AddBoxIntent = function(intent, session, response) {
     // Add a box
-    console.log('AddBox: Intent.slots='+JSON.stringify(intent.slots)+' session='+JSON.stringify(session))
+    console.log('AddBox: Intent.slots=' + JSON.stringify(intent.slots) + ' session=' +
+      JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
-    let myContext=storage.newBox(session)
-    myContext.data.name=boxName
-    myContext.save(function(x) {
-      console.log('x=', x)
+    storage.loadBox(session, function(myContext) {
+      myContext.data.name = boxName
+      myContext.save(function(x) {
+        console.log('x=', x)
+      })
+      response.ask('What would you like to add to the box ' + boxName + '?',
+        'You can also take out something or ask what\'s in the box')
     })
-    response.ask('What would you like to add to the box '+boxName+'?', 'You can also remove something or ask what\'s in the box')
   }
 
-  intentHandlers.RemoveBoxIntent = function (intent, session, response) {
-    // Add a box
-    console.log('RemoveBox Intent.slots='+JSON.stringify(intent.slots)+' session='+JSON.stringify(session))
+  intentHandlers.RemoveBoxIntent = function(intent, session, response) {
+    // Remove a box
+    console.log('RemoveBox Intent.slots=' + JSON.stringify(intent.slots) +
+      ' session=' + JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
-    let myContext=storage.newBox(session)
-    myContext.data.name=boxName
-    myContext.save()
-    response.tell('Box '+boxName+' removed. It no longer exists.')
+    storage.loadBox(session, function(myContext) {
+      myContext.data.name = ''
+      myContext.data.content = []
+      myContext.save(function(x) {
+        console.log('x=', x)
+      })
+      response.tell('Box ' + boxName + ' removed. It no longer exists.')
+    })
   }
 
-  /*
-  intentHandlers.NewGameIntent = function (intent, session, response) {
-    //reset scores for all existing players
-    storage.loadGame(session, function (currentGame) {
-      if (currentGame.data.players.length === 0) {
-        response.ask('New game started. Who\'s your first player?',
-          'Please tell me who\'s your first player?')
-        return
-      }
-      currentGame.data.players.forEach(function (player) {
-        currentGame.data.scores[player] = 0
-      })
-      currentGame.save(function () {
-        var speechOutput = 'New game started with '
-                    + currentGame.data.players.length + ' existing player'
-        if (currentGame.data.players.length > 1) {
-          speechOutput += 's'
-        }
-        speechOutput += '.'
-        if (skillContext.needMoreHelp) {
-          speechOutput += '. You can give a player points, add another player, reset all players or exit. What would you like?'
-          var repromptText = 'You can give a player points, add another player, reset all players or exit. What would you like?'
-          response.ask(speechOutput, repromptText)
-        } else {
-          response.tell(speechOutput)
-        }
+  intentHandlers.AddItemIntent = function(intent, session, response) {
+    // Add an item to a box
+    let boxName = intent.slots.BoxName.value
+    let itemName = intent.slots.ItemName.value
+    console.log('AddItem Intent.slots=' + JSON.stringify(intent.slots) + ' session=' +
+      JSON.stringify(session))
+    storage.loadBox(session, function(myContext) {
+      console.log('(5) boxName=' + boxName + ' and myContext=' + JSON.stringify(
+        myContext))
+
+      myContext.data.content.push(itemName)
+      console.log('(6) data=' + JSON.stringify(myContext))
+      myContext.save(function() {
+        console.log('Write to DynamoDB successful')
+        response.ask('Item ' + itemName + ' added to box ' + boxName +
+          '. Anything else?')
       })
     })
   }
 
-  intentHandlers.AddPlayerIntent = function (intent, session, response) {
-    //add a player to the current game,
-    //terminate or continue the conversation based on whether the intent
-    //is from a one shot command or not.
-    var newPlayerName = textHelper.getPlayerName(intent.slots.PlayerName.value)
-    if (!newPlayerName) {
-      response.ask('OK. Who do you want to add?', 'Who do you want to add?')
-      return
-    }
-    storage.loadGame(session, function (currentGame) {
-      var speechOutput,
-        reprompt
-      if (currentGame.data.scores[newPlayerName] !== undefined) {
-        speechOutput = newPlayerName + ' has already joined the game.'
-        if (skillContext.needMoreHelp) {
-          response.ask(speechOutput + ' What else?', 'What else?')
-        } else {
-          response.tell(speechOutput)
-        }
-        return
-      }
-      speechOutput = newPlayerName + ' has joined your game. '
-      currentGame.data.players.push(newPlayerName)
-      currentGame.data.scores[newPlayerName] = 0
-      if (skillContext.needMoreHelp) {
-        if (currentGame.data.players.length == 1) {
-          speechOutput += 'You can say, I am Done Adding Players. Now who\'s your next player?'
-          reprompt = textHelper.nextHelp
-        } else {
-          speechOutput += 'Who is your next player?'
-          reprompt = textHelper.nextHelp
-        }
-      }
-      currentGame.save(function () {
-        if (reprompt) {
-          response.ask(speechOutput, reprompt)
-        } else {
-          response.tell(speechOutput)
-        }
-      })
-    })
-  }
 
-  intentHandlers.AddScoreIntent = function (intent, session, response) {
-    //give a player points, ask additional question if slot values are missing.
-    var playerName = textHelper.getPlayerName(intent.slots.PlayerName.value),
-      score = intent.slots.ScoreNumber,
-      scoreValue
-    if (!playerName) {
-      response.ask('sorry, I did not hear the player name, please say that again', 'Please say the name again')
-      return
-    }
-    scoreValue = parseInt(score.value)
-    if (isNaN(scoreValue)) {
-      console.log('Invalid score value = ' + score.value)
-      response.ask('sorry, I did not hear the points, please say that again', 'please say the points again')
-      return
-    }
-    storage.loadGame(session, function (currentGame) {
-      var targetPlayer, speechOutput = '', newScore
-      if (currentGame.data.players.length < 1) {
-        response.ask('sorry, no player has joined the game yet, what can I do for you?', 'what can I do for you?')
-        return
+  intentHandlers.TakeItemIntent = function(intent, session, response) {
+    // Add an item to a box
+    console.log('Removeitem Intent.slots=' + JSON.stringify(intent.slots) +
+      ' session=' + JSON.stringify(session))
+    let boxName = intent.slots.BoxName.value
+    let itemName = intent.slots.ItemName.value
+    storage.loadBox(session, function(myContext) {
+      console.log('(7) myContext=' + JSON.stringify(myContext))
+      if (boxName === undefined) {
+        if (myContext.data.name)
+          boxName = myContext.data.name
+        else
+          boxName = 'unknown'
       }
-      for (var i = 0; i < currentGame.data.players.length; i++) {
-        if (currentGame.data.players[i] === playerName) {
-          targetPlayer = currentGame.data.players[i]
-          break
-        }
-      }
-      if (!targetPlayer) {
-        response.ask('Sorry, ' + playerName + ' has not joined the game. What else?', playerName + ' has not joined the game. What else?')
-        return
-      }
-      newScore = currentGame.data.scores[targetPlayer] + scoreValue
-      currentGame.data.scores[targetPlayer] = newScore
-
-      speechOutput += scoreValue + ' for ' + targetPlayer + '. '
-      if (currentGame.data.players.length == 1 || currentGame.data.players.length > 3) {
-        speechOutput += targetPlayer + ' has ' + newScore + ' in total.'
+      const itemIndex = myContext.data.content.indexOf(itemName)
+      if (itemIndex === -1) {
+        response.ask('There is no ' + itemName + ' in the box ' + boxName +
+          '. Anything else I can do?')
       } else {
-        speechOutput += 'That\'s '
-        currentGame.data.players.forEach(function (player, index) {
-          if (index === currentGame.data.players.length - 1) {
-            speechOutput += 'And '
-          }
-          speechOutput += player + ', ' + currentGame.data.scores[player]
-          speechOutput += ', '
+        myContext.data.content.splice(itemIndex, 1)
+        console.log('(8) data=' + JSON.stringify(myContext))
+        myContext.save(function() {
+          console.log('Write to DynamoDB successful')
+          response.ask('Item ' + itemName + ' removed from box ' + boxName +
+            '. Anything else?')
         })
       }
-      currentGame.save(function () {
-        response.tell(speechOutput)
-      })
     })
   }
 
-  intentHandlers.TellScoresIntent = function (intent, session, response) {
-    //tells the scores in the leaderboard and send the result in card.
-    storage.loadGame(session, function (currentGame) {
-      var sortedPlayerScores = [],
-        continueSession,
-        speechOutput = '',
-        leaderboard = ''
-      if (currentGame.data.players.length === 0) {
-        response.tell('Nobody has joined the game.')
-        return
-      }
-      currentGame.data.players.forEach(function (player) {
-        sortedPlayerScores.push({
-          score: currentGame.data.scores[player],
-          player: player
-        })
-      })
-      sortedPlayerScores.sort(function (p1, p2) {
-        return p2.score - p1.score
-      })
-      sortedPlayerScores.forEach(function (playerScore, index) {
-        if (index === 0) {
-          speechOutput += playerScore.player + ' has ' + playerScore.score + 'point'
-          if (playerScore.score > 1) {
-            speechOutput += 's'
+  intentHandlers.ListBoxItemsIntent = function(intent, session, response) {
+    // List contents of a box
+    console.log('ListBoxItems Intent.slots=' + JSON.stringify(intent.slots) +
+      ' session=' + JSON.stringify(session))
+    let boxName = intent.slots.BoxName.value
+    let speechOutput
+    storage.loadBox(session, function(myContext) {
+      if (myContext.data.content.length == 0) {
+        speechOutput = 'Box ' + boxName + ' is empty.'
+      } else {
+        speechOutput = 'This is the contents of box ' + boxName + ':'
+        let sortedItems = myContext.data.content.sort()
+        let lastItem = sortedItems[0]
+        let lastCount = 1
+        for (let i = 1; i < sortedItems.length; ++i) {
+          if (sortedItems[i] != lastItem) {
+            speechOutput += lastCount + ' ' + lastItem
+            if (lastCount != 1) speechOutput += 's'
+            speechOutput += ', '
+            lastItem = sortedItems[i]
+            lastCount = 1
+          } else {
+            ++lastCount
           }
-        } else if (index === sortedPlayerScores.length - 1) {
-          speechOutput += 'And ' + playerScore.player + ' has ' + playerScore.score
-        } else {
-          speechOutput += playerScore.player + ', ' + playerScore.score
         }
-        speechOutput += '. '
-        leaderboard += 'No.' + (index + 1) + ' - ' + playerScore.player + ' : ' + playerScore.score + '\n'
-      })
-      response.tellWithCard(speechOutput, 'Leaderboard', leaderboard)
+        speechOutput += ' and ' + lastCount + ' ' + lastItem
+        if (lastCount != 1) speechOutput += 's'
+      }
+      response.ask(speechOutput + '. What would you like to do now?')
     })
   }
 
-  intentHandlers.ResetPlayersIntent = function (intent, session, response) {
-    //remove all players
-    storage.newGame(session).save(function () {
-      response.ask('New game started without players, who do you want to add first?', 'Who do you want to add first?')
+  intentHandlers.RenameBoxIntent = function(intent, session, response) {
+    // Rename a box
+    console.log('RenameBox Intent.slots=' + JSON.stringify(intent.slots) +
+      ' session=' + JSON.stringify(session))
+    let newBoxName = intent.slots.BoxName.value.split(' ')[1]
+    storage.loadBox(session, function(myContext) {
+      let oldBoxName = myContext.data.name
+      myContext.data.name = newBoxName
+      response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
     })
   }
-*/
-  intentHandlers['AMAZON.HelpIntent'] = function (intent, session, response) {
+
+  intentHandlers['AMAZON.HelpIntent'] = function(intent, session, response) {
     var speechOutput = textHelper.completeHelp
     if (skillContext.needMoreHelp) {
-      response.ask(textHelper.completeHelp + ' So, how can I help?', 'How can I help?')
+      response.ask(textHelper.completeHelp + ' So, how can I help?',
+        'How can I help?')
     } else {
       response.tell(textHelper.completeHelp)
     }
   }
 
-  intentHandlers['AMAZON.CancelIntent'] = function (intent, session, response) {
+  intentHandlers['AMAZON.CancelIntent'] = function(intent, session, response) {
     if (skillContext.needMoreHelp) {
       response.tell('Okay. When you want to put things into boxes, let me know.')
     } else {
@@ -224,7 +157,7 @@ var registerIntentHandlers = function (intentHandlers, skillContext) {
     }
   }
 
-  intentHandlers['AMAZON.StopIntent'] = function (intent, session, response) {
+  intentHandlers['AMAZON.StopIntent'] = function(intent, session, response) {
     if (skillContext.needMoreHelp) {
       response.tell('Okay.  When you want to put things into boxes, let me know.')
     } else {

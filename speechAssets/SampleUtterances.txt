@@ -1,13 +1,28 @@
+AddBoxIntent add box {BoxName}
+AddBoxIntent add box named {BoxName}
+AddBoxIntent add a box {BoxName}
+AddBoxIntent add a box named {BoxName}
 AddBoxIntent add a new box {BoxName}
 AddBoxIntent add a new box named {BoxName}
 
-RemoveBoxIntent remove box {BoxName}
-RemoveBoxIntent remove box named {BoxName}
+RemoveBoxIntent remove box {BoxName} really
+RemoveBoxIntent remove box named {BoxName} really
+RemoveBoxIntent remove a box {BoxName} really
+RemoveBoxIntent remove a box named {BoxName} really
+RemoveBoxIntent remove the box {BoxName} really
+RemoveBoxIntent remove the box named {BoxName} really
 
-AddItemIntent add a {Item} to {BoxName}
-AddItemIntent add a {Item} to box {BoxName}
+AddItemIntent put {ItemName} to box {BoxName}
+AddItemIntent put {ItemName} into {BoxName}
+AddItemIntent put a {ItemName} to box {BoxName}
+AddItemIntent put a {ItemName} to {BoxName}
+AddItemIntent put a {ItemName} to box {BoxName}
 
-RemoveitemIntent remove a {Item} from {BoxName}
-RemoveitemIntent remove a {Item} from box {BoxName}
-RemoveitemIntent remove {Item} from {BoxName}
-RemoveitemIntent remove {Item} from box {BoxName}
+RenameBoxIntent rename box {BoxName} to {BoxName}
+
+TakeItemIntent take out a {ItemName} from box {BoxName}
+TakeItemIntent take out the {ItemName} from box {BoxName}
+TakeItemIntent take {ItemName} from {BoxName}
+
+ListBoxItemsIntent what is in box {BoxName}
+ListBoxItemsIntent list box {BoxName}

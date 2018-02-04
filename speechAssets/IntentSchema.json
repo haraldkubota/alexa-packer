@@ -18,15 +18,13 @@
         }
       ]
     },
-
-/*
    {
       "intent": "AddItemIntent",
       "slots": [
         {
           "name": "ItemName",
-          "type": "AMAZON.LITERAL"
-        }
+          "type": "LIST_OF_ITEMS"
+        },
         {
           "name": "BoxName",
           "type": "LIST_OF_BOX_NAMES"
@@ -34,18 +32,36 @@
       ]
     },
    {
-      "intent": "RemoveItemIntent",
+      "intent": "ListBoxItemsIntent",
       "slots": [
-        {
-          "name": "ItemName",
-          "type": "AMAZON.LITERAL"
-        }
         {
           "name": "BoxName",
           "type": "LIST_OF_BOX_NAMES"
         }
       ]
-    }, */
+    },
+   {
+      "intent": "RenameBoxIntent",
+      "slots": [
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    },
+   {
+      "intent": "TakeItemIntent",
+      "slots": [
+        {
+          "name": "ItemName",
+          "type": "LIST_OF_ITEMS"
+        },
+        {
+          "name": "BoxName",
+          "type": "LIST_OF_BOX_NAMES"
+        }
+      ]
+    },
     {
       "intent": "AMAZON.HelpIntent"
     },

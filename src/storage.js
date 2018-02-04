@@ -8,18 +8,42 @@
     or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+
+Data format per userId:
+
+data: {
+  name: BOXNAME,
+  content: [item1, item2, item3...]
+}
+
+New:
+
+data: [
+  {
+    name: BOXNAME,
+    content: [{count: N, item: ITEMNAME},...]  
+  },
+  {
+    name: BOXNAME2,
+    content: [...]
+  }
+  ]
+*/
+
+
 'use strict'
 var AWS = require('aws-sdk')
 
 var storage = (function () {
   var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10', region: 'ap-northeast-1'})
-  console.log('dynamodb='+JSON.stringify(dynamodb))
 
   /*
      * The Box class stores all box states for the user
      */
   function Box(session, data) {
     if (data) {
+      console.log('data is not undefined!')
       this.data = data
     } else {
       this.data = {
@@ -66,13 +90,13 @@ var storage = (function () {
   return {
     loadBox: function (session, callback) {
       if (session.attributes.currentBox) {
-        console.log('get new box, populate from session=' + session.attributes.currentBox)
+        console.log('get new box, populate from session=' + JSON.stringify(session.attributes.currentBox))
         callback(new Box(session, session.attributes.currentBox))
         return
       }
       console.log('Getting data from DynamoDB')
       dynamodb.getItem({
-        TableName: 'BoxPackerUserData',
+        TableName: 'BoxPackerData',
         Key: {
           CustomerId: {
             S: session.user.userId
