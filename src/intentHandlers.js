@@ -12,6 +12,19 @@
 var textHelper = require('./textHelper'),
   storage = require('./storage')
 
+// Return undefined if no box found, return index if box found
+function findBox(data, boxName) {
+  let index=-1
+  console.log('(0) data='+JSON.stringify(data))
+  for (let i=0; i<data.boxes.length; ++i) {
+    if (data.boxes[i].name == boxName) {
+      index=i
+      break
+    }
+  }
+  return index
+}
+
 var registerIntentHandlers = function(intentHandlers, skillContext) {
 
   intentHandlers.AddBoxIntent = function(intent, session, response) {
@@ -20,12 +33,16 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
     storage.loadBox(session, function(myContext) {
-      myContext.data.name = boxName
-      myContext.save(function(x) {
-        console.log('x=', x)
+      let boxIndex=findBox(myContext.data, boxName)
+      if (boxIndex !== -1) {
+        response.ask('A box with the name '+boxName+' already exists.', 'If you\'d like to create a new box, just let me know.')
+      }
+      myContext.data.lastBox=boxName
+      myContext.data.boxes.push({name: boxName, content: []})
+      myContext.save(function() {
+        response.ask('New box '+boxName+' created. What would you like to add to the box?',
+          'Anything to put in?')
       })
-      response.ask('What would you like to add to the box ' + boxName + '?',
-        'You can also take out something or ask what\'s in the box')
     })
   }
 
@@ -35,12 +52,16 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       ' session=' + JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
     storage.loadBox(session, function(myContext) {
-      myContext.data.name = ''
-      myContext.data.content = []
-      myContext.save(function(x) {
-        console.log('x=', x)
-      })
-      response.tell('Box ' + boxName + ' removed. It no longer exists.')
+      let boxIndex=findBox(myContext.data, boxName)
+      if (boxIndex !== -1) {
+        // myContext.data.lastBox = boxName
+        myContext.data.boxes.splice(boxIndex, 1)
+        myContext.save(function() {
+          response.tell('Box ' + boxName + ' has passed on. This box is no more! It has ceased to be! It\'s expired and gone to meet its maker! This is a late box! It rests in peace! THIS IS AN EX-BOX!')
+        })
+      } else {
+        response.ask('Box '+boxName+' does not exist.', 'What else would you like to do?')
+      }
     })
   }
 
@@ -53,14 +74,20 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     storage.loadBox(session, function(myContext) {
       console.log('(5) boxName=' + boxName + ' and myContext=' + JSON.stringify(
         myContext))
+      if (boxName === undefined)
+        boxName = myContext.data.lastBox
+      let boxIndex=findBox(myContext.data, boxName)
+      if (boxIndex !== -1) {
+        myContext.data.boxes[boxIndex].content.push(itemName)
+        console.log('(6) myContext=' + JSON.stringify(myContext))
 
-      myContext.data.content.push(itemName)
-      console.log('(6) data=' + JSON.stringify(myContext))
-      myContext.save(function() {
-        console.log('Write to DynamoDB successful')
-        response.ask('Item ' + itemName + ' added to box ' + boxName +
-          '. Anything else?')
-      })
+        myContext.save(function() {
+          response.ask('Item ' + itemName + ' added to box ' + boxName +
+            '. Anything else?', 'Anything else I can do?')
+        })
+      } else {
+        response.ask('There is no box '+boxName+'.', 'Anything else I can do?')
+      }
     })
   }
 
@@ -82,14 +109,14 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       const itemIndex = myContext.data.content.indexOf(itemName)
       if (itemIndex === -1) {
         response.ask('There is no ' + itemName + ' in the box ' + boxName +
-          '. Anything else I can do?')
+          '. Anything else I can do?', 'Anything else I can do?')
       } else {
         myContext.data.content.splice(itemIndex, 1)
         console.log('(8) data=' + JSON.stringify(myContext))
         myContext.save(function() {
           console.log('Write to DynamoDB successful')
           response.ask('Item ' + itemName + ' removed from box ' + boxName +
-            '. Anything else?')
+            '. Anything else?', "Anything else I can do?")
         })
       }
     })
@@ -105,7 +132,7 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       if (myContext.data.content.length == 0) {
         speechOutput = 'Box ' + boxName + ' is empty.'
       } else {
-        speechOutput = 'This is the contents of box ' + boxName + ':'
+        speechOutput = 'This is the contents of box ' + boxName + ': '
         let sortedItems = myContext.data.content.sort()
         let lastItem = sortedItems[0]
         let lastCount = 1
@@ -123,7 +150,7 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
         speechOutput += ' and ' + lastCount + ' ' + lastItem
         if (lastCount != 1) speechOutput += 's'
       }
-      response.ask(speechOutput + '. What would you like to do now?')
+      response.ask(speechOutput + '. What would you like to do now?', 'Anything else I can do?')
     })
   }
 
@@ -135,17 +162,20 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     storage.loadBox(session, function(myContext) {
       let oldBoxName = myContext.data.name
       myContext.data.name = newBoxName
-      response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
+      myContext.save(function() {
+        console.log('Write to DynamoDB successful')
+        response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
+      })
     })
   }
 
   intentHandlers['AMAZON.HelpIntent'] = function(intent, session, response) {
     var speechOutput = textHelper.completeHelp
     if (skillContext.needMoreHelp) {
-      response.ask(textHelper.completeHelp + ' So, how can I help?',
+      response.ask(speechOutput + ' So, how can I help?',
         'How can I help?')
     } else {
-      response.tell(textHelper.completeHelp)
+      response.tell(speechOutput)
     }
   }
 

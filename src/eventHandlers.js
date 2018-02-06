@@ -28,15 +28,12 @@ var registerEventHandlers = function (eventHandlers, skillContext) {
       if (currentBox.data.name == '') {
         speechOutput += 'Box Packer, let\'s pack a box. What\'s the box name?'
         reprompt = 'What label does the box have?'
-      } else if (currentBox.isEmptyScore()) {
+      } else {
         speechOutput += 'Box Packer, '
                     + 'you have ' + currentBox.data.content.length + ' things in your '
                     + currentBox.data.name + ' box.'
         speechOutput += ' You can add or remove items.'
         reprompt = textHelper.completeHelp
-      } else {
-        speechOutput += 'Box Packer, What can I do for you?'
-        reprompt = textHelper.nextHelp
       }
       response.ask(speechOutput, reprompt)
     })

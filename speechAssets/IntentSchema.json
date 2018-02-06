@@ -5,7 +5,15 @@
       "slots": [
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "Adding",
+          "type": "Adding"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
         }
       ]
     },
@@ -14,7 +22,15 @@
       "slots": [
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "Removing",
+          "type": "Removing"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
         }
       ]
     },
@@ -23,11 +39,23 @@
       "slots": [
         {
           "name": "ItemName",
-          "type": "LIST_OF_ITEMS"
+          "type": "Items"
         },
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "Putting",
+          "type": "Putting"
+        },
+        {
+          "name": "Into",
+          "type": "Into"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
         }
       ]
     },
@@ -36,7 +64,11 @@
       "slots": [
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
         }
       ]
     },
@@ -45,7 +77,11 @@
       "slots": [
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
         }
       ]
     },
@@ -54,11 +90,23 @@
       "slots": [
         {
           "name": "ItemName",
-          "type": "LIST_OF_ITEMS"
+          "type": "Items"
         },
         {
           "name": "BoxName",
-          "type": "LIST_OF_BOX_NAMES"
+          "type": "BoxNames"
+        },
+        {
+          "name": "BoxPrefix",
+          "type": "BoxPrefix"
+        },
+        {
+          "name": "From",
+          "type": "From"
+        },
+        {
+          "name": "Removing",
+          "type": "Removing"
         }
       ]
     },

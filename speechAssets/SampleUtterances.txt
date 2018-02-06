@@ -1,28 +1,15 @@
-AddBoxIntent add box {BoxName}
-AddBoxIntent add box named {BoxName}
-AddBoxIntent add a box {BoxName}
-AddBoxIntent add a box named {BoxName}
-AddBoxIntent add a new box {BoxName}
-AddBoxIntent add a new box named {BoxName}
+AddBoxIntent {Adding} {BoxPrefix} {BoxName}
+AddBoxIntent {Adding} new {BoxPrefix} {BoxName}
 
-RemoveBoxIntent remove box {BoxName} really
-RemoveBoxIntent remove box named {BoxName} really
-RemoveBoxIntent remove a box {BoxName} really
-RemoveBoxIntent remove a box named {BoxName} really
-RemoveBoxIntent remove the box {BoxName} really
-RemoveBoxIntent remove the box named {BoxName} really
+RemoveBoxIntent {Removing} {BoxPrefix} {BoxName} really
 
-AddItemIntent put {ItemName} to box {BoxName}
-AddItemIntent put {ItemName} into {BoxName}
-AddItemIntent put a {ItemName} to box {BoxName}
-AddItemIntent put a {ItemName} to {BoxName}
-AddItemIntent put a {ItemName} to box {BoxName}
+AddItemIntent {Putting} {ItemName} {Into} {BoxPrefix} {BoxName}
 
-RenameBoxIntent rename box {BoxName} to {BoxName}
+RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
+RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
 
-TakeItemIntent take out a {ItemName} from box {BoxName}
-TakeItemIntent take out the {ItemName} from box {BoxName}
-TakeItemIntent take {ItemName} from {BoxName}
+TakeItemIntent {Removing} {ItemName} {From} {BoxPrefix} {BoxName}
+TakeItemIntent {Removing} the {ItemName} {From} {BoxPrefix} {BoxName}
 
-ListBoxItemsIntent what is in box {BoxName}
-ListBoxItemsIntent list box {BoxName}
+ListBoxItemsIntent what is in {BoxPrefix} {BoxName}
+ListBoxItemsIntent list {BoxPrefix} {BoxName}

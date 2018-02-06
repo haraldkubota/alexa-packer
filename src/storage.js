@@ -19,66 +19,71 @@ data: {
 
 New:
 
-data: [
-  {
-    name: BOXNAME,
-    content: [{count: N, item: ITEMNAME},...]  
-  },
-  {
-    name: BOXNAME2,
-    content: [...]
+data: {
+  lastBox: '',
+  boxes: [
+    {
+      name: BOXNAME,
+      content: [{count: N, item: ITEMNAME},...]  
+    },
+    {
+      name: BOXNAME2,
+      content: [...]
+    }
+    ]
   }
-  ]
 */
 
 
 'use strict'
 var AWS = require('aws-sdk')
 
-var storage = (function () {
-  var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10', region: 'ap-northeast-1'})
+var storage = (function() {
+  var dynamodb = new AWS.DynamoDB({
+    apiVersion: '2012-08-10',
+    region: 'ap-northeast-1'
+  })
 
   /*
-     * The Box class stores all box states for the user
-     */
+   * The Box class stores all box states for the user
+   */
   function Box(session, data) {
     if (data) {
       console.log('data is not undefined!')
       this.data = data
     } else {
-      this.data = {
-        name: '',
-        content: [],
-      }
+      this.data = {lastBox: '', boxes:[]}
     }
     this._session = session
     console.log('new box: ' + JSON.stringify(this.data))
   }
 
   Box.prototype = {
-    isEmpty: function () {
-      //check if any one had non-zero score,
-      //it can be used as an indication of whether the box has just started
+    isEmpty: function() {
       var boxData = this.data
-      return boxData.boxContent.length == 0
+      return boxData.boxes.length == 0 // ???
     },
 
-    save: function (callback) {
+    save: function(callback) {
       //save the box states in the session,
       //so next time we can save a read from dynamoDB
       this._session.attributes.currentBox = this.data
-      console.log('Saving '+JSON.stringify(this.data))
+      console.log('Saving ' + JSON.stringify(this.data))
       dynamodb.putItem({
         TableName: 'BoxPackerData',
         Item: {
-          CustomerId: {S: this._session.user.userId},
-          Data: {S: JSON.stringify(this.data)}
+          CustomerId: {
+            S: this._session.user.userId
+          },
+          Data: {
+            S: JSON.stringify(this.data)
+          }
         }
-      }, function (err, data) {
+      }, function(err, data) {
         if (err) {
           console.log(err, err.stack)
         } else {
-          console.log('Successful write '+JSON.stringify(data))
+          console.log('Successful write ' + JSON.stringify(data))
         }
         if (callback) {
           callback()
@@ -88,9 +93,10 @@ var storage = (function () {
   }
 
   return {
-    loadBox: function (session, callback) {
+    loadBox: function(session, callback) {
       if (session.attributes.currentBox) {
-        console.log('get new box, populate from session=' + JSON.stringify(session.attributes.currentBox))
+        console.log('get new box, populate from session=' + JSON.stringify(session.attributes
+          .currentBox))
         callback(new Box(session, session.attributes.currentBox))
         return
       }
@@ -102,7 +108,7 @@ var storage = (function () {
             S: session.user.userId
           }
         }
-      }, function (err, data) {
+      }, function(err, data) {
         var currentBox
         if (err) {
           console.log(err, err.stack)
@@ -121,7 +127,7 @@ var storage = (function () {
         }
       })
     },
-    newBox: function (session) {
+    newBox: function(session) {
       return new Box(session)
     }
   }
