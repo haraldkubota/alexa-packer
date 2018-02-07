@@ -1,15 +1,15 @@
 {
   "intents": [
     {
-      "intent": "AddBoxIntent",
+      "intent": "CreateBoxIntent",
       "slots": [
         {
           "name": "BoxName",
           "type": "BoxNames"
         },
         {
-          "name": "Adding",
-          "type": "Adding"
+          "name": "Creating",
+          "type": "Creating"
         },
         {
           "name": "BoxPrefix",
@@ -46,8 +46,8 @@
           "type": "BoxNames"
         },
         {
-          "name": "Putting",
-          "type": "Putting"
+          "name": "Adding",
+          "type": "Adding"
         },
         {
           "name": "Into",

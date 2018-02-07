@@ -116,7 +116,7 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
         myContext.save(function() {
           console.log('Write to DynamoDB successful')
           response.ask('Item ' + itemName + ' removed from box ' + boxName +
-            '. Anything else?', "Anything else I can do?")
+            '. Anything else?', 'Anything else I can do?')
         })
       }
     })
@@ -129,11 +129,16 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     let boxName = intent.slots.BoxName.value
     let speechOutput
     storage.loadBox(session, function(myContext) {
-      if (myContext.data.content.length == 0) {
+      if (boxName === undefined)
+        boxName = myContext.data.lastBox
+      let boxIndex=findBox(myContext.data, boxName)
+      if (boxIndex === -1) {
+        speechOutput = 'Box ' + boxName + ' does not exist.'
+      } else if (myContext.data.boxes[boxIndex].content.length == 0) {
         speechOutput = 'Box ' + boxName + ' is empty.'
       } else {
         speechOutput = 'This is the contents of box ' + boxName + ': '
-        let sortedItems = myContext.data.content.sort()
+        let sortedItems = myContext.data.boxes[boxIndex].content.sort()
         let lastItem = sortedItems[0]
         let lastCount = 1
         for (let i = 1; i < sortedItems.length; ++i) {

@@ -1,9 +1,9 @@
-AddBoxIntent {Adding} {BoxPrefix} {BoxName}
-AddBoxIntent {Adding} new {BoxPrefix} {BoxName}
+CreateBoxIntent {Create} {BoxPrefix} {BoxName}
+CreateBoxIntent {Create} new {BoxPrefix} {BoxName}
 
 RemoveBoxIntent {Removing} {BoxPrefix} {BoxName} really
 
-AddItemIntent {Putting} {ItemName} {Into} {BoxPrefix} {BoxName}
+AddItemIntent {Adding} {ItemName} {Into} {BoxPrefix} {BoxName}
 
 RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
 RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
