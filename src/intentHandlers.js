@@ -27,9 +27,9 @@ function findBox(data, boxName) {
 
 var registerIntentHandlers = function(intentHandlers, skillContext) {
 
-  intentHandlers.AddBoxIntent = function(intent, session, response) {
+  intentHandlers.CreateBoxIntent = function(intent, session, response) {
     // Add a box
-    console.log('AddBox: Intent.slots=' + JSON.stringify(intent.slots) + ' session=' +
+    console.log('CreateBox: Intent.slots=' + JSON.stringify(intent.slots) + ' session=' +
       JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
     storage.loadBox(session, function(myContext) {
@@ -78,6 +78,7 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
         boxName = myContext.data.lastBox
       let boxIndex=findBox(myContext.data, boxName)
       if (boxIndex !== -1) {
+        myContext.data.lastBox=boxName
         myContext.data.boxes[boxIndex].content.push(itemName)
         console.log('(6) myContext=' + JSON.stringify(myContext))
 
@@ -100,26 +101,50 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     let itemName = intent.slots.ItemName.value
     storage.loadBox(session, function(myContext) {
       console.log('(7) myContext=' + JSON.stringify(myContext))
-      if (boxName === undefined) {
-        if (myContext.data.name)
-          boxName = myContext.data.name
-        else
-          boxName = 'unknown'
-      }
-      const itemIndex = myContext.data.content.indexOf(itemName)
-      if (itemIndex === -1) {
-        response.ask('There is no ' + itemName + ' in the box ' + boxName +
-          '. Anything else I can do?', 'Anything else I can do?')
+      if (boxName === undefined)
+        boxName = myContext.data.lastBox
+      let boxIndex=findBox(myContext.data, boxName)
+      if (boxIndex !== -1) {
+        myContext.data.lastBox=boxName
+        const itemIndex = myContext.data.boxes[boxIndex].content.indexOf(itemName)
+        if (itemIndex === -1) {
+          response.ask('There is no ' + itemName + ' in the box ' + boxName +
+            '. Anything else I can do?', 'Anything else I can do?')
+        } else {
+          myContext.data.boxes[boxIndex].content.splice(itemIndex, 1)
+          console.log('(8) data=' + JSON.stringify(myContext))
+          myContext.save(function() {
+            console.log('Write to DynamoDB successful')
+            response.ask('Item ' + itemName + ' removed from box ' + boxName +
+              '. Anything else?', 'Anything else I can do?')
+          })
+        }
       } else {
-        myContext.data.content.splice(itemIndex, 1)
-        console.log('(8) data=' + JSON.stringify(myContext))
-        myContext.save(function() {
-          console.log('Write to DynamoDB successful')
-          response.ask('Item ' + itemName + ' removed from box ' + boxName +
-            '. Anything else?', 'Anything else I can do?')
-        })
+        response.ask('There is no box '+boxName+'.', 'Anything else I can do?')
       }
     })
+  }
+
+  function makePlural(count, thing) {
+    if (count == 1) {
+      return thing
+    } else {
+      let s
+      switch(thing) {
+      case 'mouse': 
+        s='mice'
+        break
+      case 'cactus':
+        s='cacti'
+        break
+      case 'woman':
+        s='women'
+        break
+      default:
+        s = thing + ((thing.charAt(thing.length-1) == 's') ? 'es' : 's')
+      }
+      return s
+    }
   }
 
   intentHandlers.ListBoxItemsIntent = function(intent, session, response) {
@@ -134,28 +159,31 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       let boxIndex=findBox(myContext.data, boxName)
       if (boxIndex === -1) {
         speechOutput = 'Box ' + boxName + ' does not exist.'
-      } else if (myContext.data.boxes[boxIndex].content.length == 0) {
-        speechOutput = 'Box ' + boxName + ' is empty.'
       } else {
-        speechOutput = 'This is the contents of box ' + boxName + ': '
-        let sortedItems = myContext.data.boxes[boxIndex].content.sort()
-        let lastItem = sortedItems[0]
-        let lastCount = 1
-        for (let i = 1; i < sortedItems.length; ++i) {
-          if (sortedItems[i] != lastItem) {
-            speechOutput += lastCount + ' ' + lastItem
-            if (lastCount != 1) speechOutput += 's'
-            speechOutput += ', '
-            lastItem = sortedItems[i]
-            lastCount = 1
-          } else {
-            ++lastCount
+        myContext.data.lastBox=boxName
+        if (myContext.data.boxes[boxIndex].content.length == 0) {
+          speechOutput = 'Box ' + boxName + ' is empty.'
+        } else {
+          speechOutput = 'This is the contents of box ' + boxName + ': '
+          let sortedItems = myContext.data.boxes[boxIndex].content.sort()
+          let lastItem = sortedItems[0]
+          let lastCount = 1
+          for (let i = 1; i < sortedItems.length; ++i) {
+            if (sortedItems[i] != lastItem) {
+              speechOutput += lastCount + ' ' + makePlural(lastCount, lastItem) + ', '
+              lastItem = sortedItems[i]
+              lastCount = 1
+            } else {
+              ++lastCount
+            }
           }
+          if (sortedItems.length !== 2) {
+            speechOutput += ' and '
+          }
+          speechOutput += lastCount + ' ' + makePlural(lastCount, lastItem)
         }
-        speechOutput += ' and ' + lastCount + ' ' + lastItem
-        if (lastCount != 1) speechOutput += 's'
+        response.ask(speechOutput + '. What would you like to do now?', 'Anything else I can do?')
       }
-      response.ask(speechOutput + '. What would you like to do now?', 'Anything else I can do?')
     })
   }
 
@@ -163,15 +191,18 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     // Rename a box
     console.log('RenameBox Intent.slots=' + JSON.stringify(intent.slots) +
       ' session=' + JSON.stringify(session))
-    let newBoxName = intent.slots.BoxName.value.split(' ')[1]
-    storage.loadBox(session, function(myContext) {
-      let oldBoxName = myContext.data.name
-      myContext.data.name = newBoxName
-      myContext.save(function() {
-        console.log('Write to DynamoDB successful')
-        response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
+    response.ask('I cannot rename yet.', 'Anything else I can do?')
+    if (0) {
+      let newBoxName = intent.slots.BoxName.value.split(' ')[1]
+      storage.loadBox(session, function(myContext) {
+        let oldBoxName = myContext.data.name
+        myContext.data.name = newBoxName
+        myContext.save(function() {
+          console.log('Write to DynamoDB successful')
+          response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
+        })
       })
-    })
+    }
   }
 
   intentHandlers['AMAZON.HelpIntent'] = function(intent, session, response) {
