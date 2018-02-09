@@ -189,20 +189,23 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
 
   intentHandlers.RenameBoxIntent = function(intent, session, response) {
     // Rename a box
+    let speechOutput
     console.log('RenameBox Intent.slots=' + JSON.stringify(intent.slots) +
       ' session=' + JSON.stringify(session))
-    response.ask('I cannot rename yet.', 'Anything else I can do?')
-    if (0) {
-      let newBoxName = intent.slots.BoxName.value.split(' ')[1]
-      storage.loadBox(session, function(myContext) {
-        let oldBoxName = myContext.data.name
-        myContext.data.name = newBoxName
-        myContext.save(function() {
-          console.log('Write to DynamoDB successful')
-          response.ask('Renamed box from ' + oldBoxName + ' to ' + newBoxName)
-        })
-      })
-    }
+    let oldBoxName = intent.slots.BoxName.value.split(' ')[0]
+    let newBoxName = intent.slots.BoxName.value.split(' ')[1]
+    storage.loadBox(session, function(myContext) {
+      let oldBoxIndex=findBox(myContext.data, oldBoxName)
+      if (oldBoxIndex === -1) {
+        speechOutput = 'Box ' + oldBoxName + ' does not exist.'
+      }
+      else {
+        myContext.data.boxes[oldBoxIndex].name = newBoxName
+        speechOutput = 'Box ' + oldBoxName + ' renamed to ' + newBoxName + '.'
+        myContext.data.lastName = newBoxName
+      }
+      response.ask(speechOutput + ' What would you like to do now?', 'Anything else I can do?')
+    })
   }
 
   intentHandlers['AMAZON.HelpIntent'] = function(intent, session, response) {
