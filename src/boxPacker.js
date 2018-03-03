@@ -22,7 +22,7 @@ var skillContext = {}
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Inheritance
  */
-var BoxPacker = function () {
+var BoxPacker = function() {
   AlexaSkill.call(this, APP_ID)
   skillContext.needMoreHelp = true
 }
@@ -36,4 +36,3 @@ eventHandlers.register(BoxPacker.prototype.eventHandlers, skillContext)
 intentHandlers.register(BoxPacker.prototype.intentHandlers, skillContext)
 
 module.exports = BoxPacker
-

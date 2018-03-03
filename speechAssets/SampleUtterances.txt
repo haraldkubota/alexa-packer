@@ -1,15 +1,24 @@
 CreateBoxIntent {Create} {BoxPrefix} {BoxName}
-CreateBoxIntent {Create} new {BoxPrefix} {BoxName}
+CreateBoxIntent {Create} a new {BoxPrefix} {BoxName}
+CreateBoxIntent {Create} a {BoxName} box
+CreateBoxIntent {Create} a new {BoxName} box
 
-RemoveBoxIntent {Removing} {BoxPrefix} {BoxName} really
+DeleteBoxIntent {Deleting} {BoxPrefix} {BoxName}
+DeleteBoxIntent {Deleting} the {BoxName} {BoxPrefix}
 
 AddItemIntent {Adding} {ItemName} {Into} {BoxPrefix} {BoxName}
+AddItemIntent {Adding} {ItemName} {Into} the {BoxName} box
 
 RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
 RenameBoxIntent rename {BoxPrefix} {BoxName} to {BoxName}
 
 TakeItemIntent {Removing} {ItemName} {From} {BoxPrefix} {BoxName}
 TakeItemIntent {Removing} the {ItemName} {From} {BoxPrefix} {BoxName}
+TakeItemIntent {Removing} {ItemName} {From} the {BoxName} box
+TakeItemIntent {Removing} the {ItemName} {From} the {BoxName} box
 
 ListBoxItemsIntent what is in {BoxPrefix} {BoxName}
+ListBoxItemsIntent what is in the {BoxName} box
 ListBoxItemsIntent list {BoxPrefix} {BoxName}
+ListBoxItemsIntent list the content of {BoxPrefix} {BoxName}
+ListBoxItemsIntent list the content of the {BoxName} box

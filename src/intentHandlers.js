@@ -14,11 +14,11 @@ var textHelper = require('./textHelper'),
 
 // Return undefined if no box found, return index if box found
 function findBox(data, boxName) {
-  let index=-1
-  console.log('(0) data='+JSON.stringify(data))
-  for (let i=0; i<data.boxes.length; ++i) {
+  let index = -1
+  console.log('(0) data=' + JSON.stringify(data))
+  for (let i = 0; i < data.boxes.length; ++i) {
     if (data.boxes[i].name == boxName) {
-      index=i
+      index = i
       break
     }
   }
@@ -29,38 +29,47 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
 
   intentHandlers.CreateBoxIntent = function(intent, session, response) {
     // Add a box
-    console.log('CreateBox: Intent.slots=' + JSON.stringify(intent.slots) + ' session=' +
+    console.log('CreateBox: Intent.slots=' + JSON.stringify(intent.slots) +
+      ' session=' +
       JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
     storage.loadBox(session, function(myContext) {
-      let boxIndex=findBox(myContext.data, boxName)
+      let boxIndex = findBox(myContext.data, boxName)
       if (boxIndex !== -1) {
-        response.ask('A box with the name '+boxName+' already exists.', 'If you\'d like to create a new box, just let me know.')
+        response.ask('A box with the name ' + boxName + ' already exists.',
+          'If you\'d like to create a new box, just let me know.')
       }
-      myContext.data.lastBox=boxName
-      myContext.data.boxes.push({name: boxName, content: []})
+      myContext.data.lastBox = boxName
+      myContext.data.boxes.push({
+        name: boxName,
+        content: []
+      })
       myContext.save(function() {
-        response.ask('New box '+boxName+' created. What would you like to add to the box?',
+        response.ask('New box ' + boxName +
+          ' created. What would you like to add to the box?',
           'Anything to put in?')
       })
     })
   }
 
-  intentHandlers.RemoveBoxIntent = function(intent, session, response) {
+  intentHandlers.DeleteBoxIntent = function(intent, session, response) {
     // Remove a box
-    console.log('RemoveBox Intent.slots=' + JSON.stringify(intent.slots) +
+    console.log('DeleteBox Intent.slots=' + JSON.stringify(intent.slots) +
       ' session=' + JSON.stringify(session))
     let boxName = intent.slots.BoxName.value
     storage.loadBox(session, function(myContext) {
-      let boxIndex=findBox(myContext.data, boxName)
+      let boxIndex = findBox(myContext.data, boxName)
       if (boxIndex !== -1) {
         // myContext.data.lastBox = boxName
         myContext.data.boxes.splice(boxIndex, 1)
         myContext.save(function() {
-          response.tell('Box ' + boxName + ' has passed on. This box is no more! It has ceased to be! It\'s expired and gone to meet its maker! This is a late box! It rests in peace! THIS IS AN EX-BOX!')
+          response.tell('Box ' + boxName +
+            ' has passed on. This box is no more! It has ceased to be! It\'s expired and gone to meet its maker! It rests in peace! THIS IS AN EX-BOX!'
+          )
         })
       } else {
-        response.ask('Box '+boxName+' does not exist.', 'What else would you like to do?')
+        response.ask('Box ' + boxName + ' does not exist.',
+          'What else would you like to do?')
       }
     })
   }
@@ -76,9 +85,9 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
         myContext))
       if (boxName === undefined)
         boxName = myContext.data.lastBox
-      let boxIndex=findBox(myContext.data, boxName)
+      let boxIndex = findBox(myContext.data, boxName)
       if (boxIndex !== -1) {
-        myContext.data.lastBox=boxName
+        myContext.data.lastBox = boxName
         myContext.data.boxes[boxIndex].content.push(itemName)
         console.log('(6) myContext=' + JSON.stringify(myContext))
 
@@ -87,7 +96,8 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
             '. Anything else?', 'Anything else I can do?')
         })
       } else {
-        response.ask('There is no box '+boxName+'.', 'Anything else I can do?')
+        response.ask('There is no box ' + boxName + '.',
+          'Anything else I can do?')
       }
     })
   }
@@ -103,9 +113,9 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       console.log('(7) myContext=' + JSON.stringify(myContext))
       if (boxName === undefined)
         boxName = myContext.data.lastBox
-      let boxIndex=findBox(myContext.data, boxName)
+      let boxIndex = findBox(myContext.data, boxName)
       if (boxIndex !== -1) {
-        myContext.data.lastBox=boxName
+        myContext.data.lastBox = boxName
         const itemIndex = myContext.data.boxes[boxIndex].content.indexOf(itemName)
         if (itemIndex === -1) {
           response.ask('There is no ' + itemName + ' in the box ' + boxName +
@@ -120,7 +130,8 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
           })
         }
       } else {
-        response.ask('There is no box '+boxName+'.', 'Anything else I can do?')
+        response.ask('There is no box ' + boxName + '.',
+          'Anything else I can do?')
       }
     })
   }
@@ -130,18 +141,18 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
       return thing
     } else {
       let s
-      switch(thing) {
-      case 'mouse': 
-        s='mice'
-        break
-      case 'cactus':
-        s='cacti'
-        break
-      case 'woman':
-        s='women'
-        break
-      default:
-        s = thing + ((thing.charAt(thing.length-1) == 's') ? 'es' : 's')
+      switch (thing) {
+        case 'mouse':
+          s = 'mice'
+          break
+        case 'cactus':
+          s = 'cacti'
+          break
+        case 'woman':
+          s = 'women'
+          break
+        default:
+          s = thing + ((thing.charAt(thing.length - 1) == 's') ? 'es' : 's')
       }
       return s
     }
@@ -156,11 +167,11 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     storage.loadBox(session, function(myContext) {
       if (boxName === undefined)
         boxName = myContext.data.lastBox
-      let boxIndex=findBox(myContext.data, boxName)
+      let boxIndex = findBox(myContext.data, boxName)
       if (boxIndex === -1) {
         speechOutput = 'Box ' + boxName + ' does not exist.'
       } else {
-        myContext.data.lastBox=boxName
+        myContext.data.lastBox = boxName
         if (myContext.data.boxes[boxIndex].content.length == 0) {
           speechOutput = 'Box ' + boxName + ' is empty.'
         } else {
@@ -170,7 +181,8 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
           let lastCount = 1
           for (let i = 1; i < sortedItems.length; ++i) {
             if (sortedItems[i] != lastItem) {
-              speechOutput += lastCount + ' ' + makePlural(lastCount, lastItem) + ', '
+              speechOutput += lastCount + ' ' + makePlural(lastCount, lastItem) +
+                ', '
               lastItem = sortedItems[i]
               lastCount = 1
             } else {
@@ -182,7 +194,8 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
           }
           speechOutput += lastCount + ' ' + makePlural(lastCount, lastItem)
         }
-        response.ask(speechOutput + '. What would you like to do now?', 'Anything else I can do?')
+        response.ask(speechOutput + '. What would you like to do now?',
+          'Anything else I can do?')
       }
     })
   }
@@ -195,16 +208,16 @@ var registerIntentHandlers = function(intentHandlers, skillContext) {
     let oldBoxName = intent.slots.BoxName.value.split(' ')[0]
     let newBoxName = intent.slots.BoxName.value.split(' ')[1]
     storage.loadBox(session, function(myContext) {
-      let oldBoxIndex=findBox(myContext.data, oldBoxName)
+      let oldBoxIndex = findBox(myContext.data, oldBoxName)
       if (oldBoxIndex === -1) {
         speechOutput = 'Box ' + oldBoxName + ' does not exist.'
-      }
-      else {
+      } else {
         myContext.data.boxes[oldBoxIndex].name = newBoxName
         speechOutput = 'Box ' + oldBoxName + ' renamed to ' + newBoxName + '.'
         myContext.data.lastName = newBoxName
       }
-      response.ask(speechOutput + ' What would you like to do now?', 'Anything else I can do?')
+      response.ask(speechOutput + ' What would you like to do now?',
+        'Anything else I can do?')
     })
   }
 

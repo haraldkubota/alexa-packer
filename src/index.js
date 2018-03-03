@@ -27,7 +27,7 @@
 'use strict'
 var BoxPacker = require('./boxPacker')
 
-exports.handler = function (event, context) {
+exports.handler = function(event, context) {
   var boxPacker = new BoxPacker()
   boxPacker.execute(event, context)
 }

@@ -52,7 +52,10 @@ var storage = (function() {
       console.log('data is not undefined!')
       this.data = data
     } else {
-      this.data = {lastBox: '', boxes:[]}
+      this.data = {
+        lastBox: '',
+        boxes: []
+      }
     }
     this._session = session
     console.log('new box: ' + JSON.stringify(this.data))

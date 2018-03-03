@@ -17,10 +17,11 @@ var textHelper = (function() {
 
   return {
     completeHelp: 'Here\'s some things you can say,' +
-      ' new box five' +
-      ' add car to box five' +
-      ' reset box five.' +
-      ' and exit.',
+      'create a new blue box, ' +
+      'add a pen to box five, ' +
+      'take a pen out of the blue box, ' +
+      'what is in box five, ' +
+      'delete the blue box.',
     nextHelp: 'You can put things into and take things out of boxes. I keep the inventory.' +
       ' What would you like to do?',
 
