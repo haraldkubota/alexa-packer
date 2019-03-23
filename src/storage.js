@@ -35,8 +35,7 @@ data: {
 */
 
 
-'use strict'
-var AWS = require('aws-sdk')
+const AWS = require('aws-sdk')
 
 var storage = (function() {
   var dynamodb = new AWS.DynamoDB({

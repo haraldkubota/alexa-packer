@@ -24,8 +24,7 @@
  *
  * One-shot model:
  */
-'use strict'
-var BoxPacker = require('./boxPacker')
+const BoxPacker = require('./boxPacker')
 
 exports.handler = function(event, context) {
   var boxPacker = new BoxPacker()
